@@ -1,5 +1,6 @@
 import koa from 'koa'
 import koaBasicAuth from 'koa-basic-auth'
+import koaMount from 'koa-mount'
 import koaStatic from 'koa-static'
 
 let app = koa()
@@ -17,6 +18,8 @@ const HTML = `
 
 app.use(koaBasicAuth)
 app.use(koaStatic(__dirname + '/static'))
+
+app.use(koaMount('/secret', auth({name: 'user', pass: 'password'})))
 
 app.use(function *(next) {
     console.log('Test middleware - pre-yield.')
