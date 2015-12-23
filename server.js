@@ -1,10 +1,14 @@
 import koa from 'koa'
-import koaBasicAuth from 'koa-basic-auth'
 import koaMount from 'koa-mount'
 import koaStatic from 'koa-static'
+import basicAuth from 'basic-auth'
 
 let app = koa()
 
+const validUsers = [
+    { name: 'username', password: 'password' },
+    { name: 'another', password: '123456789' }
+]
 const HTML = `
 <!DOCTYPE html>
 <html>
@@ -34,9 +38,25 @@ secret.use(function *(next) {
     }
 })
 
-secret.use(koaBasicAuth({name: 'username', pass: 'password'}))
 secret.use(function *(next) {
-    this.body = 'Highly secretive information here!'
+    let credentials = basicAuth(this)
+    if(!credentials || !credentials.name || !credentials.pass)
+        this.throw(401)
+    console.log(credentials)
+
+    for(let user of validUsers) {
+        if(user.name == credentials.name && user.password == credentials.pass) {
+            this.user = user
+            yield next;
+        }
+    }
+
+    if(!this.user)
+        this.throw(401)
+})
+
+secret.use(function *(next) {
+    this.body = `Highly secretive information here for ${this.user.name}'s eyes only.`
 })
 
 app.use(koaMount('/secret', secret))
