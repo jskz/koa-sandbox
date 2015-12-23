@@ -34,11 +34,10 @@ secret.use(function *(next) {
     }
 })
 
+secret.use(koaBasicAuth({name: 'username', pass: 'password'}))
 secret.use(function *(next) {
     this.body = 'Highly secretive information here!'
 })
-
-secret.use(koaBasicAuth({name: 'username', pass: 'password'}))
 
 app.use(koaMount('/secret', secret))
 
