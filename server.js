@@ -32,7 +32,9 @@ secret.use(function *(next) {
             throw err
         }
     }
+})
 
+secret.use(function *(next) {
     this.body = 'Highly secretive information here!'
 })
 
