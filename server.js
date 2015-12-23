@@ -42,7 +42,6 @@ secret.use(function *(next) {
     let credentials = basicAuth(this)
     if(!credentials || !credentials.name || !credentials.pass)
         this.throw(401)
-    console.log(credentials)
 
     for(let user of validUsers) {
         if(user.name == credentials.name && user.password == credentials.pass) {
