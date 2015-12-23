@@ -16,22 +16,34 @@ const HTML = `
 </body>
 </html>`
 
-app.use(koaBasicAuth)
 app.use(koaStatic(__dirname + '/static'))
 
-app.use(koaMount('/secret', auth({name: 'user', pass: 'password'})))
+let secret = koa()
+
+secret.use(function *(next)) {
+    try {
+        yield next
+    } catch(err) {
+        if(401 == err.status) {
+            this.status = 401
+            this.set('WWW-Authenticate', 'Basic')
+            this.body = 'Authentication failed.'
+        } else {
+            throw err
+        }
+    }
+
+    this.body = 'Highly secretive information here!'
+}
+
+secret.use(koaBasicAuth({user: 'username', password: 'password'}))
+
+app.use(koaMount('/secret', secret))
 
 app.use(function *(next) {
     console.log('Test middleware - pre-yield.')
-    yield next;
+    yield next
     console.log('Test middleware - post-yield.')
-})
-
-app.use(function *() {
-    console.log('Setting responsive body to `Hello Koa!`')
-    console.log(this)
-
-    this.body = `Hello Koa!`
 })
 
 app.listen(8080)
