@@ -20,7 +20,7 @@ app.use(koaStatic(__dirname + '/static'))
 
 let secret = koa()
 
-secret.use(function *(next)) {
+secret.use(function *(next) {
     try {
         yield next
     } catch(err) {
@@ -34,9 +34,9 @@ secret.use(function *(next)) {
     }
 
     this.body = 'Highly secretive information here!'
-}
+})
 
-secret.use(koaBasicAuth({user: 'username', password: 'password'}))
+secret.use(koaBasicAuth({name: 'username', pass: 'password'}))
 
 app.use(koaMount('/secret', secret))
 
@@ -44,6 +44,12 @@ app.use(function *(next) {
     console.log('Test middleware - pre-yield.')
     yield next
     console.log('Test middleware - post-yield.')
+})
+
+app.use(function *(next) {
+    yield next;
+
+    this.body = 'Setting body from inner root middleware.'
 })
 
 app.listen(8080)
